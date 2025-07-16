@@ -47,7 +47,7 @@ pipeline {
             }
         }
 
-        /*
+        
         stage('Deploy to AWS App Runner') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-token']]) {
@@ -67,6 +67,6 @@ pipeline {
                 }
             }
         }
-        */
+        
     }
 }
