@@ -1,5 +1,6 @@
-from langchain_community.chains import RetrievalQA
-from langchain_core.prompts import PromptTemplate
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
 
 from app.components.llm import load_llm
 from app.components.vector_store import load_vector_store
@@ -17,13 +18,10 @@ Context:
 {context}
 
 Question:
-{question}
+{input}
 
 Answer:
 """
-
-def set_custom_prompt():
-    return PromptTemplate(template=CUSTOM_PROMPT_TEMPLATE,input_variables=["context" , "question"])
 
 def create_qa_chain():
     try:
@@ -38,13 +36,15 @@ def create_qa_chain():
         if llm is None:
             raise CustomException("LLM not loaded. Please check if GROQ_API_KEY is set in the .env file.")
 
-        qa_chain = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=db.as_retriever(search_kwargs={'k': 1}),
-            return_source_documents=False,
-            chain_type_kwargs={'prompt': set_custom_prompt()}
-        )
+        # Create prompt template
+        prompt = ChatPromptTemplate.from_template(CUSTOM_PROMPT_TEMPLATE)
+        
+        # Create document chain
+        document_chain = create_stuff_documents_chain(llm, prompt)
+        
+        # Create retrieval chain
+        retriever = db.as_retriever(search_kwargs={'k': 1})
+        qa_chain = create_retrieval_chain(retriever, document_chain)
 
         logger.info("Successfully created the QA chain")
         return qa_chain

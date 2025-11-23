@@ -30,8 +30,8 @@ def index():
 
             try:
                 qa_chain = create_qa_chain()
-                response = qa_chain.invoke({"query" : user_input})
-                result = response.get("result" , "No response")
+                response = qa_chain.invoke({"input" : user_input})
+                result = response.get("answer" , "No response")
 
                 messages.append({"role" : "assistant" , "content" : result})
                 session["messages"] = messages
