@@ -49,7 +49,19 @@ def clear():
     return redirect(url_for("index"))
 
 if __name__=="__main__":
-    app.run(host="0.0.0.0" , port=5000 , debug=False , use_reloader = False)
+    import traceback
+    try:
+        from waitress import serve
+        print("Starting Medical RAG Chatbot with Waitress...")
+        print("Server running on http://0.0.0.0:5000")
+        print("Press Ctrl+C to quit")
+        serve(app, host="0.0.0.0", port=5000, threads=4)
+    except ImportError:
+        print("Waitress not found, using Flask development server...")
+        app.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False, threaded=True)
+    except Exception as e:
+        print(f"ERROR: {e}")
+        traceback.print_exc()
 
 
 

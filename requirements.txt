@@ -8,3 +8,5 @@ huggingface_hub
 flask
 python-dotenv
 sentence-transformers
+gunicorn
+waitress

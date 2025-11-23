@@ -31,12 +31,12 @@ def create_qa_chain():
         db = load_vector_store()
 
         if db is None:
-            raise CustomException("Vector store not present or empty")
+            raise CustomException("Vector store not present or empty. Please ensure the vector database is created.")
 
         llm = load_llm()
 
         if llm is None:
-            raise CustomException("LLM not loaded")
+            raise CustomException("LLM not loaded. Please check if GROQ_API_KEY is set in the .env file.")
 
         qa_chain = RetrievalQA.from_chain_type(
             llm=llm,
