@@ -31,6 +31,7 @@ def create_qa_chain():
         if db is None:
             raise CustomException("Vector store not present or empty. Please ensure the vector database is created.")
 
+        logger.info("Loading LLM")
         llm = load_llm()
 
         if llm is None:
@@ -42,7 +43,7 @@ def create_qa_chain():
         # Create document chain
         document_chain = create_stuff_documents_chain(llm, prompt)
         
-        # Create retrieval chain
+        # Create retrieval chain with minimal retrieval (k=1) for memory efficiency
         retriever = db.as_retriever(search_kwargs={'k': 1})
         qa_chain = create_retrieval_chain(retriever, document_chain)
 

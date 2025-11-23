@@ -9,6 +9,16 @@ HF_TOKEN = os.environ.get("HF_TOKEN")
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+# Global cache for QA chain to avoid reloading models
+_qa_chain_cache = None
+
+def get_qa_chain():
+    """Get or create QA chain with lazy loading and caching."""
+    global _qa_chain_cache
+    if _qa_chain_cache is None:
+        _qa_chain_cache = create_qa_chain()
+    return _qa_chain_cache
+
 from markupsafe import Markup
 def nl2br(value):
     return Markup(value.replace("\n" , "<br>\n"))
@@ -29,7 +39,7 @@ def index():
             session["messages"] = messages
 
             try:
-                qa_chain = create_qa_chain()
+                qa_chain = get_qa_chain()
                 response = qa_chain.invoke({"input" : user_input})
                 result = response.get("answer" , "No response")
 
@@ -47,6 +57,19 @@ def index():
 def clear():
     session.pop("messages" , None)
     return redirect(url_for("index"))
+
+@app.route("/health")
+def health():
+    """Health check endpoint for monitoring."""
+    return {"status": "healthy"}, 200
+
+# Preload models when using --preload flag
+try:
+    print("Preloading QA chain models...")
+    get_qa_chain()
+    print("Models preloaded successfully!")
+except Exception as e:
+    print(f"Warning: Could not preload models: {e}")
 
 if __name__=="__main__":
     import traceback
